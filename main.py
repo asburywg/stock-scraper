@@ -22,7 +22,6 @@ def get_symbols(persist=True):
     # S&P 500
     sp = SP500()
     result['SP500'] = sp.symbols
-    print(f"S&P 500 events: {sp.get_events()}")
     # Exchanges (NASDAQ / NYSE)
     ex = Exchanges()
     result['NASDAQ'] = ex.nasdaq
@@ -30,6 +29,7 @@ def get_symbols(persist=True):
     # write results
     if persist:
         write_json(sp.constituents, 'sp500')
+        write_json(sp.get_events(), 'sp500_events', False)
         write_json(ex.listed_json(), 'exchanges')
     return result
 

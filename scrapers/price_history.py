@@ -20,6 +20,7 @@ class PriceHistory:
         result = {}
         for s in self.tickers.split(" "):
             df = data[s]
-            df = df[df.Volume.notnull()]
+            df = df[df.Volume.notnull()].reset_index()
+            df['Date'] = df['Date'].dt.strftime('%Y-%m-%d')
             result[s] = json.loads(df.to_json(orient="records"))
         return result
