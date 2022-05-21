@@ -103,4 +103,3 @@ class Exchanges:
                 errors='ignore')
         df['Name'] = df['Name'].apply(lambda x: x.replace('- Common Stock', '').replace('Common Shares', '').strip())
         return df
-

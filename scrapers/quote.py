@@ -1,6 +1,7 @@
-import requests
 from bs4 import BeautifulSoup
 from datetime import date
+
+from scrapers.common import fetch
 
 
 def decimal(dec):
@@ -12,17 +13,21 @@ class Quote:
     >>> q = Quote("AAPL")
     >>> q.table  # raw
     >>> q.quote  # parsed
+
+    TODO: multiprocess list of tickers to speed up
     """
 
     def __init__(self, symbol):
         self.symbol = symbol.replace('.', '-')
-        self._source_url = f"https://finance.yahoo.com/quote/{symbol}"
+        self._source_url = f"https://finance.yahoo.com/quote/{self.symbol}"
         self._source = self._scrape_yf()
-        self.table = self._get_quote()
-        self.quote = {'symbol': self.symbol, **self._parse_table()}
+        self.table = None if not self._source else self._get_quote()
+        self.quote = self._parse_table()
 
     def _scrape_yf(self):
-        response = requests.get(self._source_url)
+        response = fetch(self._source_url)
+        if not response:
+            return None
         html = BeautifulSoup(response.text, 'html.parser')
         table_div = html.find('div', {'id': 'quote-summary'})
         return None if table_div is None else table_div.find_all('table')
@@ -38,6 +43,8 @@ class Quote:
         return table
 
     def _parse_table(self):
+        if not self.table:
+            return {}
         days_range = self.table['Day\'s Range'].split(' - ')
         long_range = self.table['52 Week Range'].split(' - ')
         dividend = self.table['Forward Dividend & Yield'].split(' (')
@@ -56,7 +63,8 @@ class Quote:
             'volume': decimal(self.table['Volume']),
             'avg_volume': decimal(self.table['Avg. Volume']),
             'market_cap': self.table['Market Cap'],  # str to dec
-            'beta_5y_mo': decimal(self.table['Beta (5Y Monthly)']) if self.table['Beta (5Y Monthly)'] != "N/A" else None,
+            'beta_5y_mo': decimal(self.table['Beta (5Y Monthly)']) if self.table[
+                                                                          'Beta (5Y Monthly)'] != "N/A" else None,
             'pe_ttm': decimal(self.table['PE Ratio (TTM)']) if self.table['PE Ratio (TTM)'] != "N/A" else None,
             'eps_ttm': decimal(self.table['EPS (TTM)']) if self.table['EPS (TTM)'] != "N/A" else None,
             'earnings_date': self.table['Earnings Date'],

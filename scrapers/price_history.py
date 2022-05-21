@@ -23,4 +23,3 @@ class PriceHistory:
             df = df[df.Volume.notnull()]
             result[s] = json.loads(df.to_json(orient="records"))
         return result
-

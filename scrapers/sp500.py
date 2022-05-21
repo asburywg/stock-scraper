@@ -1,7 +1,7 @@
 import re
-import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+from scrapers.common import fetch
 
 
 class SP500:
@@ -19,7 +19,7 @@ class SP500:
         self.symbols = [x['symbol'] for x in self.constituents]
 
     def _scrape_wiki(self):
-        response = requests.get(self.SOURCE_URL)
+        response = fetch(self.SOURCE_URL)
         return BeautifulSoup(response.text, 'html.parser')
 
     def _get_constituents(self):
@@ -49,4 +49,3 @@ class SP500:
                                 'symbol_added': cols[1], 'company_added': cols[2], 'symbol_removed': cols[3],
                                 'company_removed': cols[4], 'reason': re.sub("[\(\[].*?[\)\]]", "", cols[5])})
         return results
-

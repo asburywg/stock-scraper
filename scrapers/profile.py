@@ -1,5 +1,4 @@
-import time
-import requests
+from scrapers.common import fetch
 
 
 class YahooFinance:
@@ -27,17 +26,9 @@ class YahooFinance:
             "country": self.data.get('assetProfile').get('country')
         }
 
-    def _fetch_data(self, retries=0, max_retries=3):
-        ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36"
-        try:
-            response = requests.get(self._source_url, timeout=10, headers={"User-Agent": ua})
-            return response.json().get('quoteSummary').get('result')[0]
-        except:
-            if retries < max_retries:
-                time.sleep(3)
-                self._fetch_data(retries+1)
-            else:
-                return None
-
-
-
+    def _fetch_data(self):
+        res = fetch(self._source_url)
+        if res:
+            result = res.json().get('quoteSummary').get('result')
+            return result[0] if result else None
+        return None
