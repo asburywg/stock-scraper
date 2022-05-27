@@ -1,3 +1,3 @@
-data/*
-.idea/*
+data/
+.idea/
 scrapers/__pycache__/*
